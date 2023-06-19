@@ -12,5 +12,7 @@ namespace Institute_Mng.Models
         public string EmailAddress { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int Age { get; set; }
+        public string Classroom { get; set; }
+
     }
 }

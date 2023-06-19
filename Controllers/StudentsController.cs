@@ -26,8 +26,8 @@ namespace YourNamespace.Controllers
         {
             try
             {
-                string query = "INSERT INTO Students (FirstName, LastName, ContactPerson, ContactNo, EmailAddress, DateOfBirth, Age) " +
-                               "VALUES (@FirstName, @LastName, @ContactPerson, @ContactNo, @EmailAddress, @DateOfBirth, @Age)";
+                string query = "INSERT INTO Students (FirstName, LastName, ContactPerson, ContactNo, EmailAddress, DateOfBirth, Age, Classroom) " +
+               "VALUES (@FirstName, @LastName, @ContactPerson, @ContactNo, @EmailAddress, @DateOfBirth, @Age, @Classroom)";
 
                 using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
@@ -38,8 +38,9 @@ namespace YourNamespace.Controllers
                         command.Parameters.AddWithValue("@ContactPerson", student.ContactPerson);
                         command.Parameters.AddWithValue("@ContactNo", student.ContactNo);
                         command.Parameters.AddWithValue("@EmailAddress", student.EmailAddress);
-                        command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
+                        command.Parameters.AddWithValue("@DateOfBirth", Convert.ToDateTime(student.DateOfBirth));
                         command.Parameters.AddWithValue("@Age", student.Age);
+                        command.Parameters.AddWithValue("@Classroom", student.Classroom);
 
                         connection.Open();
                         command.ExecuteNonQuery();
@@ -52,6 +53,40 @@ namespace YourNamespace.Controllers
             {
                 _logger.LogError(ex, "Error occurred while creating a student.");
                 return StatusCode(500, "An error occurred while creating the student.");
+            }
+        }
+
+        [HttpDelete("delete/{email}")]
+        public IActionResult DeleteStudent(string email)
+        {
+            try
+            {
+                string query = "DELETE FROM Students WHERE EmailAddress = @EmailAddress";
+
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@EmailAddress", email);
+
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Student deleted successfully.");
+                        }
+                        else
+                        {
+                            return NotFound("Student not found.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting the student.");
+                return StatusCode(500, "An error occurred while deleting the student.");
             }
         }
 
@@ -83,7 +118,8 @@ namespace YourNamespace.Controllers
                                     ContactNo = reader["ContactNo"].ToString(),
                                     EmailAddress = reader["EmailAddress"].ToString(),
                                     DateOfBirth = Convert.ToDateTime(reader["DateOfBirth"]),
-                                    Age = Convert.ToInt32(reader["Age"])
+                                    Age = Convert.ToInt32(reader["Age"]),
+                                    Classroom = reader["Classroom"].ToString()
                                 };
 
                                 students.Add(student);

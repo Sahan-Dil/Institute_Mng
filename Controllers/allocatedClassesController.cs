@@ -50,6 +50,40 @@ namespace YourNamespace.Controllers
             }
         }
 
+        [HttpDelete("delete/{id}")]
+        public IActionResult DeleteAllocatedClass(int id)
+        {
+            try
+            {
+                string query = "DELETE FROM AllocatedClasses WHERE Id = @Id";
+
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", id);
+
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Allocated class deleted successfully.");
+                        }
+                        else
+                        {
+                            return NotFound("Allocated class not found.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting an allocated class.");
+                return StatusCode(500, "An error occurred while deleting the allocated class.");
+            }
+        }
+
         [HttpGet("getAll")]
         public IActionResult GetAllAllocatedClasses()
         {

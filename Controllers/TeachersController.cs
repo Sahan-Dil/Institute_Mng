@@ -55,6 +55,40 @@ namespace YourNamespace.Controllers
             }
         }
 
+        [HttpDelete("delete/{email}")]
+        public IActionResult DeleteTeacher(string email)
+        {
+            try
+            {
+                string query = "DELETE FROM Teachers WHERE EmailAddress = @EmailAddress";
+
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@EmailAddress", email);
+
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Teacher deleted successfully.");
+                        }
+                        else
+                        {
+                            return NotFound("Teacher not found.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting the teacher.");
+                return StatusCode(500, "An error occurred while deleting the teacher.");
+            }
+        }
+
         [HttpGet("getAll")]
         public IActionResult GetAllTeachers()
         {

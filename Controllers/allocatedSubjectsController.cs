@@ -50,6 +50,41 @@ namespace YourNamespace.Controllers
             }
         }
 
+        [HttpDelete("delete/{id}")]
+        public IActionResult DeleteAllocatedSubject(int id)
+        {
+            try
+            {
+                string query = "DELETE FROM AllocatedSubjects WHERE Id = @Id";
+
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", id);
+
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Allocated subject deleted successfully.");
+                        }
+                        else
+                        {
+                            return NotFound("Allocated subject not found.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting an allocated subject.");
+                return StatusCode(500, "An error occurred while deleting the allocated subject.");
+            }
+        }
+
+
         [HttpGet("getAll")]
         public IActionResult GetAllAllocatedSubjects()
         {
